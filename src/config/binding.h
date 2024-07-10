@@ -125,6 +125,12 @@ namespace toml
                 throw toml::syntax_error("Ruleset has incorrect type, should be one of following:\n  surge-ruleset, quantumultx, clash-domain, clash-ipcidr, clash-classic", v.at("type").location());
             }
             conf.Url += toml::find<String>(v, "ruleset");
+            auto pos = conf.Url.find("+");
+            conf.Tag = conf.Group;
+            if (pos != String::npos) {
+                conf.Tag = conf.Url.substr(0, pos);
+                conf.Url = conf.Url.substr(pos+1);
+            }
             conf.Interval = toml::find_or<Integer>(v, "interval", 86400);
             return conf;
         }
@@ -269,24 +275,33 @@ namespace INIBinding
             {
                 RulesetConfig conf;
                 String::size_type pos = x.find(",");
+                String url;
                 if(pos == String::npos)
                     continue;
                 conf.Group = x.substr(0, pos);
+                conf.Tag = conf.Group;
                 if(x.substr(pos + 1, 2) == "[]")
                 {
-                    conf.Url = x.substr(pos + 1);
+                    url = x.substr(pos + 1);
                     //conf.Type = RulesetType::SurgeRuleset;
-                    confs.emplace_back(std::move(conf));
-                    continue;
+                } else {
+                    String::size_type epos = x.rfind(",");
+                    if(pos != epos)
+                    {
+                        conf.Interval = to_int(x.substr(epos + 1), 0);
+                        url = x.substr(pos + 1, epos - pos - 1);
+                    }
+                    else
+                        url = x.substr(pos + 1);
                 }
-                String::size_type epos = x.rfind(",");
-                if(pos != epos)
-                {
-                    conf.Interval = to_int(x.substr(epos + 1), 0);
-                    conf.Url = x.substr(pos + 1, epos - pos - 1);
+                pos = url.find("+");
+                if (pos == String::npos) {
+                    conf.Url = url;
+                } else {
+                    // with specefic Tag
+                    conf.Url = url.substr(pos+1);
+                    conf.Tag = url.substr(0, pos);
                 }
-                else
-                    conf.Url = x.substr(pos + 1);
                 confs.emplace_back(std::move(conf));
             }
             return confs;
@@ -343,3 +358,4 @@ namespace INIBinding
 }
 
 #endif // BINDING_H_INCLUDED
+
