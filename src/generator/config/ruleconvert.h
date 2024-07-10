@@ -22,6 +22,7 @@ enum ruleset_type
 struct RulesetContent
 {
     std::string rule_group;
+    std::string rule_tag;
     std::string rule_path;
     std::string rule_path_typed;
     int rule_type = RULESET_SURGE;

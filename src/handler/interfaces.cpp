@@ -138,6 +138,7 @@ std::string getRuleset(RESPONSE_CALLBACK_ARGS) {
             getUrlArg(argument, "group"));
     std::string output_content, dummy;
     int type_int = to_int(type, 0);
+    writeLog(0, "getRuleset url: " + url + ", type: " + type + ", group: " + group, LOG_LEVEL_INFO);
 
     if (url.empty() || type.empty() || (type_int == 2 && group.empty()) || (type_int < 1 || type_int > 6)) {
         *status_code = 400;
@@ -153,6 +154,7 @@ std::string getRuleset(RESPONSE_CALLBACK_ARGS) {
     refreshRulesets(confs, rca);
     for (RulesetContent &x: rca) {
         std::string content = x.rule_content.get();
+	// writeLog(0, "content: " + content, LOG_LEVEL_INFO);
         output_content += convertRuleset(content, x.rule_type);
     }
 

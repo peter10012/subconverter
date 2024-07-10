@@ -1,6 +1,7 @@
 #include <string>
 #include <mutex>
 #include <toml.hpp>
+#include <unistd.h>
 
 #include "config/binding.h"
 #include "handler/webget.h"
@@ -248,7 +249,7 @@ void readRuleset(YAML::Node node, string_array &dest, bool scope_limit = true)
 void refreshRulesets(RulesetConfigs &ruleset_list, std::vector<RulesetContent> &ruleset_content_array)
 {
     eraseElements(ruleset_content_array);
-    std::string rule_group, rule_url, rule_url_typed, interval;
+    std::string rule_group, rule_tag, rule_url, rule_url_typed, interval;
     RulesetContent rc;
 
     std::string proxy = parseProxy(global.proxyRuleset);
@@ -257,11 +258,13 @@ void refreshRulesets(RulesetConfigs &ruleset_list, std::vector<RulesetContent> &
     {
         rule_group = x.Group;
         rule_url = x.Url;
+        rule_tag = x.Tag;
         std::string::size_type pos = x.Url.find("[]");
+        writeLog(0, "rule_url: " + rule_url + ", rule_group: " + rule_group + ", rule_tag: " +  rule_tag, LOG_LEVEL_INFO);
         if(pos != std::string::npos)
         {
             writeLog(0, "Adding rule '" + rule_url.substr(pos + 2) + "," + rule_group + "'.", LOG_LEVEL_INFO);
-            rc = {rule_group, "", "", RULESET_SURGE, std::async(std::launch::async, [=](){return rule_url.substr(pos);}), 0};
+            rc = {rule_group, rule_tag, "", "", RULESET_SURGE, std::async(std::launch::async, [=](){return rule_url.substr(pos);}), 0};
         }
         else
         {
@@ -274,7 +277,8 @@ void refreshRulesets(RulesetConfigs &ruleset_list, std::vector<RulesetContent> &
                 type = iter->second;
             }
             writeLog(0, "Updating ruleset url '" + rule_url + "' with group '" + rule_group + "'.", LOG_LEVEL_INFO);
-            rc = {rule_group, rule_url, rule_url_typed, type, fetchFileAsync(rule_url, proxy, global.cacheRuleset, true, global.asyncFetchRuleset), x.Interval};
+            rc = {rule_group, rule_tag, rule_url, rule_url_typed, type, fetchFileAsync(rule_url, proxy, global.cacheRuleset, true, global.asyncFetchRuleset), x.Interval};
+            // write(0, "content: "+ rc.rule_content.get(), LOG_LEVEL_INFO);
         }
         ruleset_content_array.emplace_back(std::move(rc));
     }
@@ -1235,6 +1239,7 @@ int loadExternalConfig(std::string &path, ExternalConfig &ext)
     ini.enter_section("custom");
     if(ini.item_prefix_exist("custom_proxy_group"))
     {
+        writeLog(0, "custom_proxy_group importItems", LOG_LEVEL_DEBUG);
         string_array vArray;
         ini.get_all("custom_proxy_group", vArray);
         importItems(vArray, global.APIMode);
@@ -1243,6 +1248,7 @@ int loadExternalConfig(std::string &path, ExternalConfig &ext)
     std::string ruleset_name = ini.item_prefix_exist("ruleset") ? "ruleset" : "surge_ruleset";
     if(ini.item_prefix_exist(ruleset_name))
     {
+        writeLog(0, "ruleset importItems", LOG_LEVEL_DEBUG);
         string_array vArray;
         ini.get_all(ruleset_name, vArray);
         importItems(vArray, global.APIMode);
@@ -1299,3 +1305,4 @@ int loadExternalConfig(std::string &path, ExternalConfig &ext)
 
     return 0;
 }
+
