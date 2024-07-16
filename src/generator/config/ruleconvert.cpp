@@ -580,7 +580,7 @@ void rulesetToSingBox(rapidjson::Document &base_rule, std::vector<RulesetContent
             ruleset.AddMember("type", "remote", allocator);
             ruleset.AddMember("format", "binary", allocator);
             ruleset.AddMember("url", rapidjson::Value(x.rule_path.c_str(), allocator) , allocator);
-            ruleset.AddMember("download_detour", "direct", allocator);
+            ruleset.AddMember("download_detour", "DIRECT", allocator);
             rule_set.PushBack(ruleset, allocator);
 
 
