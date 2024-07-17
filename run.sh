@@ -1,5 +1,9 @@
 #!/bin/bash
 
-docker rm -f subcvt
-docker build . -t subcvt --build-arg "HTTP_PROXY=http://192.168.31.87:19999" --build-arg "HTTPS_PROXY=http://192.168.31.87:19999" -f Dockerfile
-docker run --name subcvt --restart=always -p 25500:25500 subcvt
+shopt -s expand_aliases
+which docker 2>&1 1>/dev/null && (echo "") || alias docker=podman
+
+docker rm -f subconv
+docker rmi -f subconv
+docker build --build-arg "http_proxy=$http_proxy" --build-arg "https_proxy=$https_proxy" . -t subconv -f Dockerfile
+docker run --rm --name subconv -p 25500:25500 subconv
