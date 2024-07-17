@@ -44,8 +44,10 @@ RUN set -xe && \
     python3 scripts/update_rules.py -c scripts/rules_config.conf && \
     cmake -DCMAKE_BUILD_TYPE=Release . && \
     make -j $THREADS && \
-    curl -L https://github.com/upx/upx/releases/download/v4.2.4/upx-4.2.4-arm64_linux.tar.xz | tar xvfJ - && \
-    install -m755 upx-4.2.4-arm64_linux/upx /usr/bin && \
+    [ `arch` == "aarch64" ] && ( \
+    curl -L https://github.com/upx/upx/releases/download/v4.2.4/upx-4.2.4-arm64_linux.tar.xz | tar xvfJ - ; \
+    install -m755 upx-4.2.4-arm64_linux/upx /usr/bin \
+    ) || apk add upx && \
     upx --best subconverter
 
 # build final image
