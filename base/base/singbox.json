@@ -6,69 +6,66 @@
     },
     "dns": {
         "servers": [
-            {
-                "tag": "dns_proxy",
-                "address": "tls://1.1.1.1",
-                "address_resolver": "dns_resolver"
-            },
-            {
-                "tag": "dns_direct",
-                "address": "https://dns.alidns.com/dns-query",
-                "address_resolver": "dns_resolver",
-                "detour": "DIRECT"
-            },
-            {
-                "tag": "dns_fakeip",
-                "address": "fakeip"
-            },
-            {
-                "tag": "dns_resolver",
-                "address": "223.5.5.5",
-                "detour": "DIRECT"
-            },
-            {
-                "tag": "block",
-                "address": "rcode://success"
-            }
-        ],
-        "rules": [
-            {
-                "outbound": [
-                    "any"
-                ],
-                "server": "dns_resolver"
-            },
-            {
-                "geosite": [
-                    "category-ads-all"
-                ],
-                "server": "dns_block",
-                "disable_cache": true
-            },
-            {
-                "geosite": [
-                    "geolocation-!cn"
-                ],
-                "query_type": [
-                    "A",
-                    "AAAA"
-                ],
-                "server": "dns_fakeip"
-            },
-            {
-                "geosite": [
-                    "geolocation-!cn"
-                ],
-                "server": "dns_proxy"
-            }
-        ],
-        "final": "dns_direct",
-        "independent_cache": true,
-        "fakeip": {
-            "enabled": true,
-            "inet6_range": "fc00::\/18",
-            "inet4_range": "198.18.0.0\/15"
+        {
+            "tag": "remote-dns",
+            "address": "tls://8.8.8.8",
+            "address_resolver": "remote-resolver-dns",
+            "detour": "🚀 Select"
+        },
+        {
+            "tag": "local-dns",
+            "address": "https://223.5.5.5/dns-query",
+            "address_resolver": "resolver-dns",
+            "detour": "direct"
+        },
+        {
+            "tag": "resolver-dns",
+            "address": "223.5.5.5",
+            "detour": "direct"
+        },
+        {
+            "tag": "remote-resolver-dns",
+            "address": "8.8.8.8",
+            "detour": "🚀 Select"
+        },
+        {
+            "tag": "block",
+            "address": "rcode://success"
         }
+        ],
+        "disable_cache": false,
+        "disable_expire": false,
+        "independent_cache": false,
+        "rules": [
+        {
+            "outbound": "any",
+            "disable_cache": true,
+            "server": "local-dns"
+        },
+        {
+            "clash_mode": "direct",
+            "server": "local-dns"
+        },
+        {
+            "clash_mode": "global",
+            "server": "remote-dns"
+        },
+        {
+            "rule_set": "GEOSITE-CN",
+            "server": "local-dns"
+        },
+        {
+            "rule_set": "GEOLOCATION-!CN",
+            "server": "remote-dns"
+        }
+        ],
+        "fakeip": {
+        "enabled": false,
+        "inet4_range": "198.18.0.1/16",
+        "inet6_range": "fc00::/18"
+        },
+        "final": "remote-dns",
+        "strategy": "ipv4_only"
     },
     "ntp": {
         "enabled": true,
