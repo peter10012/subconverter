@@ -277,42 +277,62 @@ enhanced-mode-by-rule = true
     "dns": {
         "servers": [
             {
-                "tag": "dns_proxy",
-                "address": "tls://1.1.1.1",
-                "address_resolver": "dns_resolver"
+                "tag": "remote-dns",
+                "address": "tls://8.8.8.8",
+                "address_resolver": "remote-resolver-dns",
+                "detour": "🚀 Select"
             },
             {
-                "tag": "dns_direct",
-                "address": "h3://dns.alidns.com/dns-query",
-                "address_resolver": "dns_resolver",
-                "detour": "DIRECT"
+                "tag": "local-dns",
+                "address": "https://223.5.5.5/dns-query",
+                "address_resolver": "resolver-dns",
+                "detour": "direct"
             },
             {
-                "tag": "dns_fakeip",
-                "address": "fakeip"
-            },
-            {
-                "tag": "dns_resolver",
+                "tag": "resolver-dns",
                 "address": "223.5.5.5",
-                "detour": "DIRECT"
+                "detour": "direct"
             },
             {
-                "tag": "block",
+                "tag": "remote-resolver-dns",
+                "address": "8.8.8.8",
+                "detour": "🚀 Select"
+            },
+            {
+                "tag": "dns-block",
                 "address": "rcode://success"
             }
         ],
+        "disable_cache": false,
+        "disable_expire": false,
+        "independent_cache": false,
         "rules": [
             {
-                "outbound": [
-                    "any"
-                ],
-                "server": "dns_resolver"
+                "outbound": "any",
+                "disable_cache": true,
+                "server": "local-dns"
+            },
+            {
+                "clash_mode": "direct",
+                "server": "local-dns"
+            },
+            {
+                "clash_mode": "global",
+                "server": "remote-dns"
+            },
+            {
+                "rule_set": "GEOSITE-CN",
+                "server": "local-dns"
+            },
+            {
+                "rule_set": "GEOLOCATION-!CN",
+                "server": "remote-dns"
             },
             {
                 "geosite": [
                     "category-ads-all"
                 ],
-                "server": "dns_block",
+                "server": "dns-block",
                 "disable_cache": true
             },
             {
@@ -332,15 +352,13 @@ enhanced-mode-by-rule = true
                 "server": "dns_proxy"
             }
         ],
-        "final": "dns_direct",
-        "independent_cache": true,
         "fakeip": {
-            "enabled": true,
-            {% if default(request.singbox.ipv6, "") == "1" %}
-            "inet6_range": "fc00::\/18",
-            {% endif %}
-            "inet4_range": "198.18.0.0\/15"
-        }
+            "enabled": false,
+            "inet4_range": "198.18.0.1/16",
+            "inet6_range": "fc00::/18"
+        },
+        "final": "remote-dns",
+        "strategy": "ipv4_only"
     },
     "ntp": {
         "enabled": true,
