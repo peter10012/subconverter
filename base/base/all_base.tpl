@@ -286,12 +286,12 @@ enhanced-mode-by-rule = true
                 "tag": "local-dns",
                 "address": "https://223.5.5.5/dns-query",
                 "address_resolver": "resolver-dns",
-                "detour": "direct"
+                "detour": "DIRECT"
             },
             {
                 "tag": "resolver-dns",
                 "address": "223.5.5.5",
-                "detour": "direct"
+                "detour": "DIRECT"
             },
             {
                 "tag": "remote-resolver-dns",
@@ -313,19 +313,11 @@ enhanced-mode-by-rule = true
                 "server": "local-dns"
             },
             {
-                "clash_mode": "direct",
+                "clash_mode": "DIRECT",
                 "server": "local-dns"
             },
             {
-                "clash_mode": "global",
-                "server": "remote-dns"
-            },
-            {
-                "rule_set": "GEOSITE-CN",
-                "server": "local-dns"
-            },
-            {
-                "rule_set": "GEOLOCATION-!CN",
+                "clash_mode": "GLOBAL",
                 "server": "remote-dns"
             },
             {
