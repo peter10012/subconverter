@@ -1,5 +1,5 @@
 FROM alpine:3.16 AS builder
-ARG THREADS="4"
+ARG THREADS="8"
 ARG SHA=""
 
 # build minimized

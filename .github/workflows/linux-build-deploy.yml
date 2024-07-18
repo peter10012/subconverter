@@ -3,15 +3,15 @@ name: Docker Image CI
 on:
   push:
     branches: [ "master" ]
+    tags:
+      - "v*"
   pull_request:
     branches: [ "master" ]
 
 env:
   image: subconv
   
-
 jobs:
-
   build:
     runs-on: ubuntu-latest
     steps:
@@ -21,19 +21,26 @@ jobs:
     - name: Export image
       run: |
         docker save -o ${{env.image}}.tar ${{env.image}}:latest
-    - uses: alinz/ssh-scp-action@v0.1.2
+    - uses: cross-the-world/ssh-scp-ssh-pipelines@v1.1.4
       with:
         # ssh remote host
-        host: ${{vars.SUBCONV_HOST}} # optional
+        host: ${{ vars.SUBCONV_HOST }} # optional
         # ssh remote port
-        port: ${{vars.SUBCONV_PORT}} # optional, default is 22
+        port: ${{ vars.SUBCONV_PORT }} # optional, default is 22
         # ssh user
-        user: ${{secrets.SUBCONV_SSH_USER}} # optional
+        user: ${{ secrets.SUBCONV_SSH_USER }} # optional
         # content of ssh private key. ex raw content of ~/.ssh/id_rsa
-        key: ${{secrets.SUBCONV_SSH_PRIVATE_KEY}} # optional
+        pass: ${{ secrets.SUBCONV_SSH_PASS }} # optional
         # execute commands before SCP
-        ssh_before: docker rm -f subconv && docker rmi -f subconv && rm /tmp/${{env.image}}.tar
+        first_ssh: |
+          [ -n "`docker ps -a | grep subconv`" ] && docker rm -f subconv;  
+          [ -n "`docker images 2>/dev/null | grep subconv`" ] && docker rmi -f subconv;
+          [ -f /tmp/${{env.image}}.tar ] && rm /tmp/${{env.image}}.tar;
+          true
         # scp local and remote
-        scp: -P ${{vars.SUBCONV_PORT}} ${{env.image}}.tar ${{secrets.SUBCONV_SSH_USER}}@${{vars.SUBCONV_HOST}}:/tmp/${{env.image}}.tar # optional
+        scp: |
+          ./${{env.image}}.tar => /tmp/
         # execute commands after SCP
-        ssh_after: docker load -i /tmp/${{env.image}}.tar && docker run -d -p 25500:25500 --restart=alwasy ${{env.image}}:latest
+        last_ssh: |
+          docker load -i /tmp/${{env.image}}.tar 
+          docker run -d -p 25500:25500 --name ${{env.image}} --restart=always ${{env.image}}:latest
