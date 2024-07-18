@@ -2,8 +2,10 @@ name: GitHub CI
 on:
   push:
     branches: [ dev ]
+    paths-ignore:
+      - ".github/**"
     tags:
-      - '**'
+      - 'v*'
   workflow_dispatch:
   pull_request:
 

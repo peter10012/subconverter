@@ -2,9 +2,10 @@ name: Publish Docker Image
 on:
   push:
     branches: [ dev ]
+    paths-ignore:
+      - ".github/**"
     tags:
-      - '**'
-
+      - 'v*'
 concurrency:
   group: ${{ github.ref }}-${{ github.workflow }}
   cancel-in-progress: true
