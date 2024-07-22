@@ -1,5 +1,5 @@
 FROM alpine:3.16 AS builder
-ARG THREADS="8"
+ARG THREADS="4"
 ARG SHA=""
 
 # build minimized
@@ -34,17 +34,13 @@ RUN set -xe && \
     cd toml11 && \
     cmake -DCMAKE_CXX_STANDARD=11 . && \
     make install -j $THREADS && \
-    cd .. && \
-    # git clone https://github.com/asdlokj1qpi23/subconverter --depth=1 && \
     cd /subconverter && \
     [ -n "$SHA" ] && sed -i 's/\(v[0-9]\.[0-9]\.[0-9]\)/\1-'"$SHA"'/' src/version.h;\
-    pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple/ && \
-    python3 -m ensurepip && \
     python3 -m pip install gitpython && \
     python3 scripts/update_rules.py -c scripts/rules_config.conf && \
     cmake -DCMAKE_BUILD_TYPE=Release . && \
     make -j $THREADS && \
-    [ `arch` == "aarch64" ] && ( \
+    [ "`arch`" == "aarch64" ] && ( \
     curl -L https://github.com/upx/upx/releases/download/v4.2.4/upx-4.2.4-arm64_linux.tar.xz | tar xvfJ - ; \
     install -m755 upx-4.2.4-arm64_linux/upx /usr/bin \
     ) || apk add upx && \
