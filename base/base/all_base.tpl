@@ -286,12 +286,12 @@ enhanced-mode-by-rule = true
                 "tag": "local-dns",
                 "address": "https://223.5.5.5/dns-query",
                 "address_resolver": "resolver-dns",
-                "detour": "DIRECT"
+                "detour": "direct"
             },
             {
                 "tag": "resolver-dns",
                 "address": "223.5.5.5",
-                "detour": "DIRECT"
+                "detour": "direct"
             },
             {
                 "tag": "remote-resolver-dns",
@@ -311,14 +311,6 @@ enhanced-mode-by-rule = true
                 "outbound": "any",
                 "disable_cache": true,
                 "server": "local-dns"
-            },
-            {
-                "clash_mode": "DIRECT",
-                "server": "local-dns"
-            },
-            {
-                "clash_mode": "GLOBAL",
-                "server": "remote-dns"
             },
             {
                 "geosite": [
@@ -357,7 +349,7 @@ enhanced-mode-by-rule = true
         "server": "time.apple.com",
         "server_port": 123,
         "interval": "30m",
-        "detour": "DIRECT"
+        "detour": "direct"
     },
     "inbounds": [
         {
@@ -386,7 +378,8 @@ enhanced-mode-by-rule = true
     "outbounds": [],
     "route": {
         "rules": [],
-        "auto_detect_interface": true
+        "auto_detect_interface": true,
+		"override_android_vpn": true
     },
     "experimental": {}
 }
