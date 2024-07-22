@@ -277,30 +277,25 @@ enhanced-mode-by-rule = true
     "dns": {
         "servers": [
             {
-                "tag": "remote-dns",
-                "address": "tls://8.8.8.8",
-                "address_resolver": "remote-resolver-dns",
-                "detour": "🚀 Select"
+                "address": "https://94.140.14.14/dns-query",
+                "address_resolver": "dns-direct",
+                "strategy": "prefer_ipv4",
+                "tag": "dns-remote"
             },
             {
-                "tag": "local-dns",
-                "address": "https://223.5.5.5/dns-query",
-                "address_resolver": "resolver-dns",
-                "detour": "direct"
-            },
-            {
-                "tag": "resolver-dns",
-                "address": "223.5.5.5",
-                "detour": "direct"
-            },
-            {
-                "tag": "remote-resolver-dns",
                 "address": "8.8.8.8",
-                "detour": "🚀 Select"
+                "address_resolver": "dns-local",
+                "strategy": "prefer_ipv4",
+                "detour": "direct",
+                "tag": "dns-direct"
             },
             {
-                "tag": "dns-block",
-                "address": "rcode://success"
+                "address": "local",
+                "tag": "dns-local"
+            },
+            {
+                "address": "rcode://success",
+                "tag": "dns-block"
             }
         ],
         "disable_cache": false,
@@ -308,32 +303,22 @@ enhanced-mode-by-rule = true
         "independent_cache": false,
         "rules": [
             {
-                "outbound": "any",
+                "domain_suffix": ".cn",
+                "server": "dns-direct",
+                "domain": [
+                    "sub.xxlen.tk",
+                    "www.speedtest.net"
+                ]
+            },
+            {
                 "disable_cache": true,
-                "server": "local-dns"
-            },
-            {
-                "geosite": [
-                    "category-ads-all"
+                "rule_set": [
+                    "geosite-category-ads-all",
+                    "category-ads-all",
+                    "geosite-malware",
+                    "geosite-phishing"
                 ],
-                "server": "dns-block",
-                "disable_cache": true
-            },
-            {
-                "geosite": [
-                    "geolocation-!cn"
-                ],
-                "query_type": [
-                    "A",
-                    "AAAA"
-                ],
-                "server": "dns_fakeip"
-            },
-            {
-                "geosite": [
-                    "geolocation-!cn"
-                ],
-                "server": "dns_proxy"
+                "server": "dns-block"
             }
         ],
         "fakeip": {
@@ -341,7 +326,7 @@ enhanced-mode-by-rule = true
             "inet4_range": "198.18.0.1/16",
             "inet6_range": "fc00::/18"
         },
-        "final": "remote-dns",
+        "final": "dns-remote",
         "strategy": "ipv4_only"
     },
     "ntp": {
@@ -352,6 +337,14 @@ enhanced-mode-by-rule = true
         "detour": "direct"
     },
     "inbounds": [
+        {
+            "type": "direct",
+            "tag": "dns-in",
+            "listen": "127.0.0.1",
+            "listen_port": 6450,
+            "override_address": "8.8.8.8",
+            "override_port": 53
+        },
         {
             "type": "mixed",
             "tag": "mixed-in",
@@ -377,11 +370,42 @@ enhanced-mode-by-rule = true
     ],
     "outbounds": [],
     "route": {
-        "rules": [],
+        "rules": [
+            {
+                "port": 53,
+                "outbound": "dns-out"
+            },
+            {
+                "inbound": "dns-in",
+                "outbound": "dns-out"
+            },
+            {
+                "network": "udp",
+                "port": 443,
+                "protocol": "quic",
+                "outbound": "block"
+            },
+            {
+                "ip_is_private": true,
+                "outbound": "direct"
+            }
+        ],
         "auto_detect_interface": true,
 		"override_android_vpn": true
     },
-    "experimental": {}
+    "experimental": {
+        "cache_file": {
+            "enabled": true
+        },
+        "clash_api": {
+            "external_controller": "0.0.0.0:9090",
+            "external_ui": "yacd",
+            "external_ui_download_url": "https://github.com/MetaCubeX/Yacd-meta/archive/gh-pages.zip",
+            "external_ui_download_detour": "direct",
+            "secret": "",
+            "default_mode": "rule"
+        }
+    }
 }
 
 {% endif %}
