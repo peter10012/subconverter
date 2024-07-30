@@ -7,30 +7,25 @@
     "dns": {
         "servers": [
             {
-                "tag": "remote-dns",
-                "address": "tls://8.8.8.8",
-                "address_resolver": "remote-resolver-dns",
-                "detour": "🚀 Select"
+                "address": "https://94.140.14.14/dns-query",
+                "address_resolver": "dns-direct",
+                "strategy": "prefer_ipv4",
+                "tag": "dns-remote"
             },
             {
-                "tag": "local-dns",
-                "address": "https://223.5.5.5/dns-query",
-                "address_resolver": "resolver-dns",
-                "detour": "direct"
-            },
-            {
-                "tag": "resolver-dns",
-                "address": "223.5.5.5",
-                "detour": "direct"
-            },
-            {
-                "tag": "remote-resolver-dns",
                 "address": "8.8.8.8",
-                "detour": "🚀 Select"
+                "address_resolver": "dns-local",
+                "strategy": "prefer_ipv4",
+                "detour": "direct",
+                "tag": "dns-direct"
             },
             {
-                "tag": "dns-block",
-                "address": "rcode://success"
+                "address": "local",
+                "tag": "dns-local"
+            },
+            {
+                "address": "rcode://success",
+                "tag": "dns-block"
             }
         ],
         "disable_cache": false,
@@ -38,48 +33,22 @@
         "independent_cache": false,
         "rules": [
             {
-                "outbound": "any",
+                "domain_suffix": ".cn",
+                "server": "dns-direct",
+                "domain": [
+                    "sub.xxlen.tk",
+                    "www.speedtest.net"
+                ]
+            },
+            {
                 "disable_cache": true,
-                "server": "local-dns"
-            },
-            {
-                "clash_mode": "direct",
-                "server": "local-dns"
-            },
-            {
-                "clash_mode": "global",
-                "server": "remote-dns"
-            },
-            {
-                "rule_set": "GEOSITE-CN",
-                "server": "local-dns"
-            },
-            {
-                "rule_set": "GEOLOCATION-!CN",
-                "server": "remote-dns"
-            },
-            {
-                "geosite": [
-                    "category-ads-all"
+                "rule_set": [
+                    "geosite-category-ads-all",
+                    "category-ads-all",
+                    "geosite-malware",
+                    "geosite-phishing"
                 ],
-                "server": "dns-block",
-                "disable_cache": true
-            },
-            {
-                "geosite": [
-                    "geolocation-!cn"
-                ],
-                "query_type": [
-                    "A",
-                    "AAAA"
-                ],
-                "server": "dns_fakeip"
-            },
-            {
-                "geosite": [
-                    "geolocation-!cn"
-                ],
-                "server": "dns_proxy"
+                "server": "dns-block"
             }
         ],
         "fakeip": {
@@ -87,7 +56,7 @@
             "inet4_range": "198.18.0.1/16",
             "inet6_range": "fc00::/18"
         },
-        "final": "remote-dns",
+        "final": "dns-remote",
         "strategy": "ipv4_only"
     },
     "ntp": {
