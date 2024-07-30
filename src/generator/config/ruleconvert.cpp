@@ -551,11 +551,44 @@ void rulesetToSingBox(rapidjson::Document &base_rule, std::vector<RulesetContent
         rules.PushBack(direct_object, allocator);
     }
 
-    auto dns_object = buildObject(allocator, "protocol", "dns", "outbound", "dns-out");
-    rules.PushBack(dns_object, allocator);
+    {
+        rapidjson::Value rule(rapidjson::kObjectType);
+        rule.AddMember("port", 443, allocator);
+        rule.AddMember("outbound", "dns-out", allocator);
+        // auto dns_object = buildObject(allocator, "port", "443", "outbound", "dns-out");
+        rules.PushBack(rule, allocator);
+    }
+
+    {
+        rapidjson::Value rule(rapidjson::kObjectType);
+        rule.AddMember("inbound", "dns-in", allocator);
+        rule.AddMember("outbound", "dns-out", allocator);
+        // auto dns_object = buildObject(allocator, "port", "443", "outbound", "dns-out");
+        rules.PushBack(rule, allocator);
+    }
+
+    {
+        rapidjson::Value rule(rapidjson::kObjectType);
+        rule.AddMember("network", "udp", allocator);
+        rule.AddMember("port", 443, allocator);
+        rule.AddMember("protocol", "quic", allocator);
+        rule.AddMember("outbound", "block", allocator);
+        // auto dns_object = buildObject(allocator, "port", "443", "outbound", "dns-out");
+        rules.PushBack(rule, allocator);
+    }
+
+    {
+        rapidjson::Value rule(rapidjson::kObjectType);
+        rule.AddMember("ip_is_private", true, allocator);
+        rule.AddMember("outbound", "direct", allocator);
+        rules.PushBack(rule, allocator);
+    }
 
     std::vector<std::string_view> temp(4);
     rapidjson::Value rule_set(rapidjson::kArrayType);
+
+    rapidjson::Value direct_ruleset(rapidjson::kArrayType);
+    rapidjson::Value block_ruleset(rapidjson::kArrayType);
 
     for (RulesetContent &x : ruleset_content_array)
     {
@@ -583,6 +616,7 @@ void rulesetToSingBox(rapidjson::Document &base_rule, std::vector<RulesetContent
             continue;
         }
         // TODO: here
+
         if (isLink(url) && strstr(url.c_str(), "srs"))
         {
             writeLog(0, "singbox's binaray file url: " + x.rule_path, LOG_LEVEL_DEBUG);
@@ -595,9 +629,21 @@ void rulesetToSingBox(rapidjson::Document &base_rule, std::vector<RulesetContent
             rule_set.PushBack(ruleset, allocator);
 
             rapidjson::Value rule(rapidjson::kObjectType);
-            rule.AddMember("rule_set", rapidjson::Value(x.rule_tag.c_str(), allocator), allocator);
-            rule.AddMember("outbound", rapidjson::Value(x.rule_group.c_str(), allocator), allocator);
-            rules.PushBack(rule, allocator);
+            if (strcmp(rule_group.c_str(), "direct") == 0)
+            {
+                direct_ruleset.PushBack(rapidjson::Value(x.rule_tag.c_str(), allocator), allocator);
+            }
+            else if (strcmp(rule_group.c_str(), "block") == 0)
+            {
+                block_ruleset.PushBack(rapidjson::Value(x.rule_tag.c_str(), allocator), allocator);
+            }
+            else
+            {
+                // todo
+            }
+            // rule.AddMember("rule_set", rapidjson::Value(x.rule_tag.c_str(), allocator), allocator);
+            // rule.AddMember("outbound", rapidjson::Value(x.rule_group.c_str(), allocator), allocator);
+            // rules.PushBack(rule, allocator);
         }
         else
         {
@@ -631,6 +677,22 @@ void rulesetToSingBox(rapidjson::Document &base_rule, std::vector<RulesetContent
             rule.AddMember("outbound", rapidjson::Value(rule_group.c_str(), allocator), allocator);
             rules.PushBack(rule, allocator);
         }
+    }
+
+    if (!direct_ruleset.ObjectEmpty())
+    {
+        rapidjson::Value rule(rapidjson::kObjectType);
+        rule.AddMember("rule_set", direct_ruleset, allocator);
+        rule.AddMember("outbound", rapidjson::Value("direct", allocator), allocator);
+        rules.PushBack(rule, allocator);
+    }
+
+    if (!block_ruleset.ObjectEmpty())
+    {
+        rapidjson::Value rule(rapidjson::kObjectType);
+        rule.AddMember("rule_set", block_ruleset, allocator);
+        rule.AddMember("outbound", rapidjson::Value("block", allocator), allocator);
+        rules.PushBack(rule, allocator);
     }
 
     if (!base_rule.HasMember("route"))
