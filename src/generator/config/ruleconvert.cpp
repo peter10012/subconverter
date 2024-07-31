@@ -553,7 +553,7 @@ void rulesetToSingBox(rapidjson::Document &base_rule, std::vector<RulesetContent
 
     {
         rapidjson::Value rule(rapidjson::kObjectType);
-        rule.AddMember("port", 443, allocator);
+        rule.AddMember("port", 53, allocator);
         rule.AddMember("outbound", "dns-out", allocator);
         // auto dns_object = buildObject(allocator, "port", "443", "outbound", "dns-out");
         rules.PushBack(rule, allocator);
