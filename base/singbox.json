@@ -1,0 +1,93 @@
+{
+    "log": {
+        "disabled": false,
+        "level": "info",
+        "timestamp": true
+    },
+    "dns": {
+        "servers": [
+            {
+                "address": "https://94.140.14.14/dns-query",
+                "address_resolver": "dns-direct",
+                "strategy": "prefer_ipv4",
+                "tag": "dns-remote"
+            },
+            {
+                "address": "8.8.8.8",
+                "address_resolver": "dns-local",
+                "strategy": "prefer_ipv4",
+                "detour": "direct",
+                "tag": "dns-direct"
+            },
+            {
+                "address": "local",
+                "tag": "dns-local"
+            },
+            {
+                "address": "rcode://success",
+                "tag": "dns-block"
+            }
+        ],
+        "disable_cache": false,
+        "disable_expire": false,
+        "independent_cache": false,
+        "rules": [
+            {
+                "domain_suffix": ".cn",
+                "server": "dns-direct",
+                "domain": [
+                    "sub.xxlen.tk",
+                    "www.speedtest.net"
+                ]
+            },
+            {
+                "disable_cache": true,
+                "rule_set": [
+                    "geosite-category-ads-all",
+                    "category-ads-all",
+                    "geosite-malware",
+                    "geosite-phishing"
+                ],
+                "server": "dns-block"
+            }
+        ],
+        "fakeip": {
+            "enabled": false,
+            "inet4_range": "198.18.0.1/16",
+            "inet6_range": "fc00::/18"
+        },
+        "final": "dns-remote",
+        "strategy": "ipv4_only"
+    },
+    "ntp": {
+        "enabled": true,
+        "server": "time.apple.com",
+        "server_port": 123,
+        "interval": "30m",
+        "detour": "DIRECT"
+    },
+    "inbounds": [
+        {
+            "type": "mixed",
+            "tag": "mixed-in",
+            "listen": "0.0.0.0",
+            "listen_port": 2080
+        },
+        {
+            "type": "tun",
+            "tag": "tun-in",
+            "inet4_address": "172.19.0.1/30",
+            "inet6_address": "fdfe:dcba:9876::1/126",
+            "auto_route": true,
+            "strict_route": true,
+            "stack": "mixed",
+            "sniff": true
+        }
+    ],
+    "outbounds": [],
+    "route": {
+        "rules": [],
+        "auto_detect_interface": true
+    },
+    "experimental": {}
+}
