@@ -309,16 +309,6 @@ enhanced-mode-by-rule = true
                     "sub.xxlen.tk",
                     "www.speedtest.net"
                 ]
-            },
-            {
-                "disable_cache": true,
-                "rule_set": [
-                    "geosite-category-ads-all",
-                    "category-ads-all",
-                    "geosite-malware",
-                    "geosite-phishing"
-                ],
-                "server": "dns-block"
             }
         ],
         "fakeip": {
