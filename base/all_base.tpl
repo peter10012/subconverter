@@ -355,7 +355,8 @@ enhanced-mode-by-rule = true
             "auto_route": true,
             "strict_route": true,
             "stack": "mixed",
-            "sniff": true
+            "sniff": true,
+            "mtu": 1500
         }
     ],
     "outbounds": [],
