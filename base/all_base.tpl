@@ -277,7 +277,7 @@ enhanced-mode-by-rule = true
     "dns": {
         "servers": [
             {
-                "address": "https://94.140.14.14/dns-query",
+                "address": "https://doh.dns.sb/dns-query",
                 "address_resolver": "dns-direct",
                 "strategy": "prefer_ipv4",
                 "tag": "dns-remote"
